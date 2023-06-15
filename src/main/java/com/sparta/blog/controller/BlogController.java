@@ -78,11 +78,11 @@ public class BlogController {
     }
 
 
-    @PutMapping("/post/{id}")
-    public Long updateMemo(@PathVariable Long id, int password, @RequestBody PostRequestDto requestDto) {
-        Post post = findById(id);
+    @PutMapping("/post/{id}/{password}")
+    public Long updateMemo(@PathVariable Long id, @PathVariable int password, @RequestBody PostRequestDto requestDto) {
+        Post post = findByIdAndPassword(id, password);
         if (post != null) {
-            String sql = "UPDATE post SET title = ? author = ? contents = ? WHERE id = ?";
+            String sql = "UPDATE post SET title = ?, author = ?, contents = ? WHERE id = ?";
             jdbcTemplate.update(sql, requestDto.getTitle(), requestDto.getAuthor(), requestDto.getContents(), id);
             return id;
         } else {
@@ -90,9 +90,9 @@ public class BlogController {
         }
     }
 
-    @DeleteMapping("/post/{id}")
-    public Long deletePost(@PathVariable Long id, int password) {
-        Post post = findById(id);
+    @DeleteMapping("/post/{id}/{password}")
+    public Long deletePost(@PathVariable Long id, @PathVariable int password) {
+        Post post = findByIdAndPassword(id, password);
         if(post != null) {
             String sql = "DELETE FROM post WHERE id = ?";
             jdbcTemplate.update(sql, id);
@@ -103,8 +103,8 @@ public class BlogController {
         }
     }
 
-    private Post findById(Long id) {
-        String sql = "SELECT * FROM post WHERE id = ?";
+    private Post findByIdAndPassword(Long id, int password) {
+        String sql = "SELECT * FROM post WHERE id = ? AND password = ?";
         return jdbcTemplate.query(sql, resultSet -> {
             if(resultSet.next()) {
                 Post post = new Post();
@@ -116,7 +116,6 @@ public class BlogController {
             } else {
                 return null;
             }
-        }, id);
+        }, id, password);
     }
-
 }
