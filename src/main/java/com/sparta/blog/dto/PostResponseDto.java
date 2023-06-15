@@ -9,7 +9,7 @@ public class PostResponseDto {
     private String title;
     private String author;
     private String contents;
-    private String password;
+    private int password;
 
     public PostResponseDto(Post post) {
         this.id = post.getId();
@@ -17,5 +17,13 @@ public class PostResponseDto {
         this.author = post.getAuthor();
         this.contents = post.getContents();
         this.password = post.getPassword();
+    }
+
+    public PostResponseDto(Long id, String title, String author, String contents, int password) {
+        this.id = id;
+        this.title = title;
+        this.author = author;
+        this.contents = contents;
+        this.password = 000000;
     }
 }
