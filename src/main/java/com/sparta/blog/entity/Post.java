@@ -16,7 +16,7 @@ public class Post {
     private String title;
     private String author;
     private String contents;
-    private String password;
+    private int password;
 
     public Post(PostRequestDto requestDto) {
         this.title = requestDto.getTitle();

@@ -4,16 +4,17 @@ import com.sparta.blog.dto.PostRequestDto;
 import com.sparta.blog.dto.PostResponseDto;
 import com.sparta.blog.entity.Post;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -42,7 +43,6 @@ public class BlogController {
 
         Long id = keyHolder.getKey().longValue();
         post.setId(id);
-
         PostResponseDto postResponseDto = new PostResponseDto(post);
 
         return postResponseDto;
@@ -78,15 +78,12 @@ public class BlogController {
     }
 
 
-
     @PutMapping("/post/{id}")
-    public Long updateMemo(@PathVariable Long id, @RequestBody PostRequestDto requestDto) {
+    public Long updateMemo(@PathVariable Long id, int password, @RequestBody PostRequestDto requestDto) {
         Post post = findById(id);
-        if(post != null) {
-
-            String sql = "UPDATE post SET title = ?, author = ?, contents = ? password = ? WHERE id = ?";
-            jdbcTemplate.update(sql, requestDto.getTitle(), requestDto.getAuthor(), requestDto.getContents(), requestDto.getPassword(), id);
-
+        if (post != null) {
+            String sql = "UPDATE post SET title = ? author = ? contents = ? WHERE id = ?";
+            jdbcTemplate.update(sql, requestDto.getTitle(), requestDto.getAuthor(), requestDto.getContents(), id);
             return id;
         } else {
             throw new IllegalArgumentException("선택한 글은 존재하지 않습니다.");
@@ -94,9 +91,9 @@ public class BlogController {
     }
 
     @DeleteMapping("/post/{id}")
-    public Long deletePost(@PathVariable Long id) {
+    public Long deletePost(@PathVariable Long id, int password) {
         Post post = findById(id);
-        if (post != null ) {
+        if(post != null) {
             String sql = "DELETE FROM post WHERE id = ?";
             jdbcTemplate.update(sql, id);
 
@@ -108,7 +105,6 @@ public class BlogController {
 
     private Post findById(Long id) {
         String sql = "SELECT * FROM post WHERE id = ?";
-
         return jdbcTemplate.query(sql, resultSet -> {
             if(resultSet.next()) {
                 Post post = new Post();
@@ -122,17 +118,5 @@ public class BlogController {
             }
         }, id);
     }
-
-//    private void matchesPassword(String password, Post post) {
-//        PostResponseDto postResponseDto = new PostResponseDto(post);
-//        String storedPassword = postResponseDto.getPassword();
-//
-//        if (password.equals(storedPassword)) {
-//            System.out.println("비밀번호가 일치합니다.");
-//        } else {
-//            throw new IllegalArgumentException("잘못된 비밀번호입니다.");
-//        }
-//    }
-
 
 }
