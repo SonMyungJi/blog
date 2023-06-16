@@ -53,6 +53,11 @@ public class BlogService {
         }
 
     private Post findPostByIdAndPassword(Long id, int password) {
-        return blogRepository.findByIdAndPassword(id, password);
+        Post post = blogRepository.findByIdAndPassword(id, password);
+
+        if (post == null) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+        return post;
     }
 }

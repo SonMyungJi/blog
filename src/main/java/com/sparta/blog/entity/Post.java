@@ -22,7 +22,7 @@ public class Post extends Timestamped {
     private String author;
     @Column(name = "contents", nullable = false)
     private String contents;
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private int password;
 
     public Post(PostRequestDto requestDto) {
