@@ -33,13 +33,13 @@ public class BlogController {
         return blogService.getPost(id);
     }
 
-    @PutMapping("/post/{id}/{password}")
-    public Long updateMemo(@PathVariable Long id, @PathVariable int password, @RequestBody PostRequestDto requestDto) {
+    @PutMapping("/post/{id}/form/param")
+    public Long updateMemo(@PathVariable Long id, @RequestParam int password, @RequestBody PostRequestDto requestDto) {
         return blogService.updatePost(id, password, requestDto);
     }
 
-    @DeleteMapping("/post/{id}/{password}")
-    public Long deletePost(@PathVariable Long id, @PathVariable int password) {
+    @DeleteMapping("/post/{id}/form/param")
+    public Long deletePost(@PathVariable Long id, @RequestParam int password) {
         return blogService.deletePost(id, password);
     }
 }
