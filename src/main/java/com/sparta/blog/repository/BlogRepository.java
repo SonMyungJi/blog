@@ -5,8 +5,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.List;
+
 @Repository
 @RequestMapping("/api")
 public interface BlogRepository extends JpaRepository<Post, Long> {
     Post findByIdAndPassword(Long id, int password);
+
+    List<Post> findAllByOrderByModifiedAtDesc();
 }

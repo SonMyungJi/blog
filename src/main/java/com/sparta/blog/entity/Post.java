@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @Table(name = "post")
 @NoArgsConstructor
-public class Post {
+public class Post extends Timestamped {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +38,4 @@ public class Post {
         this.contents = requestDto.getContents();
         this.password = requestDto.getPassword();
     }
-
-
-
 }

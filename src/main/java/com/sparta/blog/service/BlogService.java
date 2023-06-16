@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequestMapping("/api")
@@ -29,25 +30,14 @@ public class BlogService {
     }
 
     public List<PostResponseDto> getPosts() {
-        return blogRepository.findAll().stream().map(PostResponseDto::new).toList();
+        return blogRepository.findAllByOrderByModifiedAtDesc().stream().map(PostResponseDto::new).toList();
     }
 
     public PostResponseDto getPost(Long id) {
-        Post post = findPost(id);
-        return covertToPostResponseDto(post);
+        Optional<Post> optionalPost = blogRepository.findById(id);
+        Post post = optionalPost.orElseThrow(() -> new IllegalArgumentException("선택한 글은 존재하지 않습니다."));
+        return new PostResponseDto(post);
     }
-
-    private PostResponseDto covertToPostResponseDto(Post post) {
-        PostResponseDto postResponseDto = new PostResponseDto();
-        postResponseDto.setId(post.getId());
-        postResponseDto.setTitle(post.getTitle());
-        postResponseDto.setAuthor(post.getAuthor());
-        postResponseDto.setContents(post.getContents());
-
-        return postResponseDto;
-    }
-
-
 
     @Transactional
     public Long updatePost(Long id, int password, PostRequestDto requestDto) {
@@ -61,10 +51,6 @@ public class BlogService {
         blogRepository.delete(post);
         return id;
         }
-
-    private Post findPost(Long id) {
-        return blogRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("선택한 글은 존재하지 않습니다."));
-    }
 
     private Post findPostByIdAndPassword(Long id, int password) {
         return blogRepository.findByIdAndPassword(id, password);

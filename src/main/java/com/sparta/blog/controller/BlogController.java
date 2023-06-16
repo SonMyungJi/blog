@@ -33,7 +33,6 @@ public class BlogController {
         return blogService.getPost(id);
     }
 
-
     @PutMapping("/post/{id}/{password}")
     public Long updateMemo(@PathVariable Long id, @PathVariable int password, @RequestBody PostRequestDto requestDto) {
         return blogService.updatePost(id, password, requestDto);

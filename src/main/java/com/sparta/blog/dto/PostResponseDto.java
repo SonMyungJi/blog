@@ -2,16 +2,18 @@ package com.sparta.blog.dto;
 
 import com.sparta.blog.entity.Post;
 import lombok.Getter;
-import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Getter
-@Setter
 public class PostResponseDto {
     private Long id;
     private String title;
     private String author;
     private String contents;
     private int password;
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
 
     public PostResponseDto(Post post) {
         this.id = post.getId();
@@ -19,13 +21,7 @@ public class PostResponseDto {
         this.author = post.getAuthor();
         this.contents = post.getContents();
         this.password = post.getPassword();
-    }
-
-    public PostResponseDto() {
-        this.id = id;
-        this.title = title;
-        this.author = author;
-        this.contents = contents;
-        this.password = 000000;
+        this.createdAt = post.getCreatedAt();
+        this.modifiedAt = post.getModifiedAt();
     }
 }
