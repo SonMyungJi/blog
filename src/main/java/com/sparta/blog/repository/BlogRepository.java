@@ -10,7 +10,5 @@ import java.util.List;
 @Repository
 @RequestMapping("/api")
 public interface BlogRepository extends JpaRepository<Post, Long> {
-    Post findByIdAndPassword(Long id, int password);
-
-    List<Post> findAllByOrderByModifiedAtDesc();
+    List<Post> findAllByOrderByCreatedAtDesc();
 }

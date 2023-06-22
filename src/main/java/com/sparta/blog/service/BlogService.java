@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequestMapping("/api")
@@ -18,46 +17,44 @@ public class BlogService {
     private final BlogRepository blogRepository;
     public BlogService(BlogRepository blogRepository) {
         this.blogRepository = blogRepository;
-    }
+    } // 제어의 역전
 
     public PostResponseDto createPost(PostRequestDto requestDto) {
-        Post post = new Post(requestDto);
-        Post savePost = blogRepository.save(post);
+        Post post = new Post(requestDto); // 게시글 생성
+        Post savePost = blogRepository.save(post); // 게시글 저장
 
-        PostResponseDto postResponseDto = new PostResponseDto(savePost);
-
-        return postResponseDto;
+        return new PostResponseDto(savePost);
     }
 
     public List<PostResponseDto> getPosts() {
-        return blogRepository.findAllByOrderByModifiedAtDesc().stream().map(PostResponseDto::new).toList();
+        return blogRepository.findAllByOrderByCreatedAtDesc().stream() // DB에서 조회한 List를 Stream으로 변환
+                .map(PostResponseDto::new) // Stream 처리를 통해 Post를 PostResponseDto로 변환
+                .toList(); // Stream을 List로 다시 변환
     }
 
     public PostResponseDto getPost(Long id) {
-        Optional<Post> optionalPost = blogRepository.findById(id);
-        Post post = optionalPost.orElseThrow(() -> new IllegalArgumentException("선택한 글은 존재하지 않습니다."));
+        Post post = findPost(id);
         return new PostResponseDto(post);
     }
 
     @Transactional
-    public Long updatePost(Long id, int password, PostRequestDto requestDto) {
-        Post post = findPostByIdAndPassword(id, password);
+    public Long updatePost(Long id, PostRequestDto requestDto) {
+        Post post = findPost(id);
+
+        post.checkPassword(requestDto.getPassword());
         post.update(requestDto);
         return id;
     }
 
-    public Long deletePost(Long id, int password) {
-        Post post = findPostByIdAndPassword(id, password);
+    public Long deletePost(Long id, String password) {
+        Post post = findPost(id);
+        post.checkPassword(password);
         blogRepository.delete(post);
         return id;
         }
 
-    private Post findPostByIdAndPassword(Long id, int password) {
-        Post post = blogRepository.findByIdAndPassword(id, password);
-
-        if (post == null) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
-        return post;
+    private Post findPost(Long id) {
+        return blogRepository.findById(id).orElseThrow(() ->
+                new IllegalArgumentException("해당 글은 존재하지 않습니다."));
     }
 }
