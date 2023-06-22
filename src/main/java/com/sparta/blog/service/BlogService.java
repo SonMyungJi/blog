@@ -38,19 +38,18 @@ public class BlogService {
     }
 
     @Transactional
-    public Long updatePost(Long id, PostRequestDto requestDto) {
+    public PostResponseDto updatePost(Long id, PostRequestDto requestDto) {
         Post post = findPost(id);
 
         post.checkPassword(requestDto.getPassword());
         post.update(requestDto);
-        return id;
+        return new PostResponseDto(post);
     }
 
-    public Long deletePost(Long id, String password) {
+    public void deletePost(Long id, String password) {
         Post post = findPost(id);
         post.checkPassword(password);
         blogRepository.delete(post);
-        return id;
         }
 
     private Post findPost(Long id) {

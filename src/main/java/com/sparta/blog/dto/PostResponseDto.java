@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 @Getter
 public class PostResponseDto {
+    private Boolean success;
     private Long id;
     private String title;
     private String author;
@@ -21,5 +22,9 @@ public class PostResponseDto {
         this.contents = post.getContents();
         this.createdAt = post.getCreatedAt();
         this.modifiedAt = post.getModifiedAt();
+    }
+
+    public PostResponseDto(Boolean success) {
+        this.success = success;
     }
 }

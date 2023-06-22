@@ -7,19 +7,19 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController // Controller + ResponseBody
+@RestController
 @RequestMapping("/api")
 public class BlogController {
 
     private final BlogService blogService;
     public BlogController(BlogService blogService) {
         this.blogService = blogService;
-    } // 제어의 역전
+    }
 
     // 게시글 작성
     @PostMapping("/posts")
-    public PostResponseDto createPost(@RequestBody PostRequestDto requestDto) { // http 요청의 body 전달
-        return blogService.createPost(requestDto); // 받은 body 데이터를 서비스로 전달
+    public PostResponseDto createPost(@RequestBody PostRequestDto requestDto) {
+        return blogService.createPost(requestDto);
     }
 
     // 게시글 목록 조회
@@ -36,15 +36,14 @@ public class BlogController {
 
     // 게시글 수정
     @PutMapping("/posts/{id}")
-    public Long updateMemo(@PathVariable Long id, @RequestBody PostRequestDto requestDto) {
+    public PostResponseDto updatePost(@PathVariable Long id, @RequestBody PostRequestDto requestDto) {
         return blogService.updatePost(id, requestDto);
     }
 
     // 게시글 삭제
     @DeleteMapping("/posts/{id}")
-    public Long deletePost(@PathVariable Long id, @RequestBody PostRequestDto requestDto) {
-        // 필요한 데이터는 비밀번호. 민감한 사항이므로 body에 담아 전달
-
-        return blogService.deletePost(id, requestDto.getPassword());
+    public PostResponseDto deletePost(@PathVariable Long id, @RequestBody PostRequestDto requestDto) {
+        blogService.deletePost(id, requestDto.getPassword());
+        return new PostResponseDto(true);
     }
 }
