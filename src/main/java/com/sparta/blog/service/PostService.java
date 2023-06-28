@@ -6,12 +6,10 @@ import com.sparta.blog.entity.Post;
 import com.sparta.blog.repository.PostRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
 @Service
-@RequestMapping("/api")
 public class PostService {
 
     private final PostRepository postRepository;
