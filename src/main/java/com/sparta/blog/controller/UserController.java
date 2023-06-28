@@ -1,8 +1,8 @@
 package com.sparta.blog.controller;
 
-import com.sparta.blog.dto.*;
+import com.sparta.blog.dto.SignupRequestDto;
+import com.sparta.blog.dto.UserResponseDto;
 import com.sparta.blog.service.UserService;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,13 +21,6 @@ public class UserController {
     @PostMapping("/user/signup")
     public UserResponseDto signup(@RequestBody SignupRequestDto requestDto) {
         userService.signup(requestDto);
-        return new UserResponseDto(true);
-    }
-
-    // 로그인
-    @PostMapping("/user/login")
-    public UserResponseDto login(@RequestBody LoginRequestDto requestDto, HttpServletResponse res) {
-        userService.login(requestDto, res);
         return new UserResponseDto(true);
     }
 }

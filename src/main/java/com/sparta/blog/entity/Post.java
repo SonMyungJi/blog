@@ -17,32 +17,21 @@ public class Post extends Timestamped {
 
     private String title;
 
-    @Column(nullable = false)
-    private String author;
-
     @Column(nullable = false, length = 500)
     private String contents;
 
-    @Column(nullable = false)
-    private String password;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    public Post(PostRequestDto requestDto) { // createPost 내용 반영
+    public Post(PostRequestDto requestDto, User user) { // createPost 내용 반영
         this.title = requestDto.getTitle();
-        this.author = requestDto.getAuthor();
         this.contents = requestDto.getContents();
-        this.password = requestDto.getPassword();
+        this.user = user;
     }
 
     public void update(PostRequestDto requestDto) { //updatePost 내용 반영
         this.title = requestDto.getTitle();
-        this.author = requestDto.getAuthor();
         this.contents = requestDto.getContents();
-        this.password = requestDto.getPassword();
-    }
-
-    public void checkPassword(String password) {
-        if (!password.equals(password)) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
     }
 }
