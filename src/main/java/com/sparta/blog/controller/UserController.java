@@ -23,4 +23,6 @@ public class UserController {
         userService.signup(requestDto);
         return new UserResponseDto(true);
     }
+
+    // 로그인은 필터에서 이루어짐
 }
