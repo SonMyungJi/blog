@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 @RequestMapping("/api")
-public interface BlogRepository extends JpaRepository<Post, Long> {
+public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findAllByOrderByCreatedAtDesc();
 }
