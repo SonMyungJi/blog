@@ -21,8 +21,8 @@ public class CommentService {
         this.postCommentRepository = postCommentRepository;
     }
 
-    public void createComment(Long id, CommentRequestDto requestDto, User user) {
-        Post post = findPost(id);
+    public void createComment(Long postId, CommentRequestDto requestDto, User user) {
+        Post post = findPost(postId);
         Comment comment = commentRepository.save(new Comment(requestDto, user));
         postCommentRepository.save(new PostComment(post, comment));
     }

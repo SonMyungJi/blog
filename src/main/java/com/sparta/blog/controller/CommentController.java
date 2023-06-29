@@ -2,6 +2,7 @@ package com.sparta.blog.controller;
 
 import com.sparta.blog.dto.CommentRequestDto;
 import com.sparta.blog.dto.CommentResponseDto;
+import com.sparta.blog.entity.Comment;
 import com.sparta.blog.security.UserDetailsImpl;
 import com.sparta.blog.service.CommentService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,13 +16,13 @@ public class CommentController {
     public CommentController(CommentService commentService) {
         this.commentService = commentService;
     }
+
     // 댓글 작성
     @PostMapping("/comments")
-    public void createComment(@PathVariable Long id,
-                           @RequestBody CommentRequestDto requestDto,
-                           @AuthenticationPrincipal UserDetailsImpl userDetails
+    public CommentResponseDto createComment(@RequestParam Long postId, @RequestBody CommentRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        commentService.createComment(id, requestDto, userDetails.getUser());
+        commentService.createComment(postId, requestDto, userDetails.getUser());
+        return new CommentResponseDto(new Comment());
     }
 
     // 댓글 수정
