@@ -5,6 +5,8 @@ import com.sparta.blog.dto.PostResponseDto;
 import com.sparta.blog.entity.Post;
 import com.sparta.blog.entity.User;
 import com.sparta.blog.entity.UserRoleEnum;
+import com.sparta.blog.repository.CommentPostRepository;
+import com.sparta.blog.repository.CommentRepository;
 import com.sparta.blog.repository.PostRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,9 +17,10 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
-    public PostService(PostRepository postRepository) {
+
+    public PostService(PostRepository postRepository, CommentRepository commentRepository, CommentPostRepository commentPostRepository) {
         this.postRepository = postRepository;
-    } // 제어의 역전
+    }
 
     public PostResponseDto createPost(PostRequestDto requestDto, User user) {
         Post post = postRepository.save(new Post(requestDto, user)); // 게시글 저장
