@@ -52,6 +52,7 @@ public class PostService {
         return new PostResponseDto(post);
     }
 
+    @Transactional
     public void deletePost(User user, Long id) {
         UserRoleEnum userRoleEnum = user.getRole();
         Post post;

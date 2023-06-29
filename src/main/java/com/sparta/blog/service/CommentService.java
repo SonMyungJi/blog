@@ -28,13 +28,13 @@ public class CommentService {
     }
 
     @Transactional
-    public void updateComment(Long id, CommentRequestDto requestDto, User user) {
+    public void updateComment(Long id, Long postId, CommentRequestDto requestDto, User user) {
         UserRoleEnum userRoleEnum = user.getRole();
         Post post;
         Comment comment;
 
         if (userRoleEnum == UserRoleEnum.USER) {
-            post = postRepository.findByUserAndId(user, id);
+            post = postRepository.findByUserAndId(user, postId);
             if (post == null) {
                 throw new IllegalArgumentException("해당 글은 존재하지 않습니다.");
             }
@@ -43,21 +43,21 @@ public class CommentService {
                 throw new IllegalArgumentException("해당 댓글은 존재하지 않습니다.");
             }
         } else {
-            post = findPost(id);
+            post = findPost(postId);
             comment = findComment(id);
         }
 
         comment.update(requestDto);
     }
 
-
-    public void deleteComment(Long id, User user) {
+    @Transactional
+    public void deleteComment(Long id, Long postId, User user) {
         UserRoleEnum userRoleEnum = user.getRole();
         Post post;
         Comment comment;
 
         if (userRoleEnum == UserRoleEnum.USER) {
-            post = postRepository.findByUserAndId(user, id);
+            post = postRepository.findByUserAndId(user, postId);
             if (post == null) {
                 throw new IllegalArgumentException("해당 글은 존재하지 않습니다.");
             }
@@ -66,7 +66,7 @@ public class CommentService {
                 throw new IllegalArgumentException("해당 댓글은 존재하지 않습니다.");
             }
         } else {
-            post = findPost(id);
+            post = findPost(postId);
             comment = findComment(id);
         }
 
