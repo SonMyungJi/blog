@@ -42,9 +42,6 @@ public class CommentService {
             if (comment == null) {
                 throw new IllegalArgumentException("해당 댓글은 존재하지 않습니다.");
             }
-            if (!comment.getComment().equals(comment)) {
-                throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
-            }
         } else {
             post = findPost(postId);
             comment = findComment(id);
@@ -67,9 +64,6 @@ public class CommentService {
             comment = commentRepository.findByUserAndId(user, id);
             if (comment == null) {
                 throw new IllegalArgumentException("해당 댓글은 존재하지 않습니다.");
-            }
-            if (!comment.getComment().equals(comment)) {
-                throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
             }
         } else {
             post = findPost(postId);

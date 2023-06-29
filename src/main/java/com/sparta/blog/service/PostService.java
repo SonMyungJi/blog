@@ -5,6 +5,7 @@ import com.sparta.blog.dto.PostResponseDto;
 import com.sparta.blog.entity.Post;
 import com.sparta.blog.entity.User;
 import com.sparta.blog.entity.UserRoleEnum;
+import com.sparta.blog.repository.PostCommentRepository;
 import com.sparta.blog.repository.PostRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,9 +16,11 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
-    public PostService(PostRepository postRepository) {
+    private final PostCommentRepository postCommentRepository;
+    public PostService(PostRepository postRepository, PostCommentRepository postCommentRepository) {
         this.postRepository = postRepository;
-    } // 제어의 역전
+        this.postCommentRepository = postCommentRepository;
+    }
 
     public PostResponseDto createPost(PostRequestDto requestDto, User user) {
         Post post = postRepository.save(new Post(requestDto, user)); // 게시글 저장
@@ -45,9 +48,6 @@ public class PostService {
             if (post == null) {
                 throw new IllegalArgumentException("해당 글은 존재하지 않습니다.");
             }
-            if (!post.getUser().equals(user)) {
-                throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
-            }
         } else {
             post = findPost(id);
         }
@@ -65,12 +65,10 @@ public class PostService {
             if (post == null) {
                 throw new IllegalArgumentException("해당 글은 존재하지 않습니다.");
             }
-            if (!post.getUser().equals(user)) {
-                throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
-            }
         } else {
             post = findPost(id);
         }
+        postCommentRepository.deleteByPost(post);
         postRepository.delete(post);
     }
 
