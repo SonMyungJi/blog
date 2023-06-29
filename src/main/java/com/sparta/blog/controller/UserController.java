@@ -18,7 +18,7 @@ public class UserController {
     }
 
     // 회원가입
-    @PostMapping("/auth/signup")
+    @PostMapping("/user/signup")
     public UserResponseDto signup(@RequestBody SignupRequestDto requestDto) {
         return userService.signup(requestDto);
     }
