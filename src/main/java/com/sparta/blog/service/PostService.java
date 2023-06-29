@@ -4,6 +4,7 @@ import com.sparta.blog.dto.PostRequestDto;
 import com.sparta.blog.dto.PostResponseDto;
 import com.sparta.blog.entity.Post;
 import com.sparta.blog.entity.User;
+import com.sparta.blog.entity.UserRoleEnum;
 import com.sparta.blog.repository.PostRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,16 +36,36 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDto updatePost(Long id, PostRequestDto requestDto) {
-        Post post = findPost(id);
+    public PostResponseDto updatePost(User user, Long id, PostRequestDto requestDto) {
+        UserRoleEnum userRoleEnum = user.getRole();
+        Post post;
+
+        if (userRoleEnum == UserRoleEnum.USER) {
+            post = postRepository.findByUserAndId(user, id);
+            if (post == null) {
+                throw new NullPointerException("해당 글은 존재하지 않습니다.");
+            }
+        } else {
+            post = findPost(id);
+        }
         post.update(requestDto);
         return new PostResponseDto(post);
     }
 
-    public void deletePost(Long id) {
-        Post post = findPost(id);
-        postRepository.delete(post);
+    public void deletePost(User user, Long id) {
+        UserRoleEnum userRoleEnum = user.getRole();
+        Post post;
+
+        if (userRoleEnum == UserRoleEnum.USER) {
+            post = postRepository.findByUserAndId(user, id);
+            if (post == null) {
+                throw new NullPointerException("해당 글은 존재하지 않습니다.");
+            }
+        } else {
+            post = findPost(id);
         }
+        postRepository.delete(post);
+    }
 
     private Post findPost(Long id) {
         return postRepository.findById(id).orElseThrow(() ->

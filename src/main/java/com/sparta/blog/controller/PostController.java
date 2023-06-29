@@ -40,13 +40,13 @@ public class PostController {
     // 게시글 수정
     @PutMapping("/posts/{id}")
     public PostResponseDto updatePost(@PathVariable Long id, @RequestBody PostRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return postService.updatePost(id, requestDto);
+        return postService.updatePost(userDetails.getUser(), id, requestDto);
     }
 
     // 게시글 삭제
     @DeleteMapping("/posts/{id}")
     public PostResponseDto deletePost(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        postService.deletePost(id);
+        postService.deletePost(userDetails.getUser(), id);
         return new PostResponseDto(true);
     }
 }

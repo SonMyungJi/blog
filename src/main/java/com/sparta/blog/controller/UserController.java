@@ -20,8 +20,7 @@ public class UserController {
     // 회원가입
     @PostMapping("/user/signup")
     public UserResponseDto signup(@RequestBody SignupRequestDto requestDto) {
-        userService.signup(requestDto);
-        return new UserResponseDto(true);
+        return userService.signup(requestDto);
     }
 
     // 로그인은 필터에서 이루어짐
