@@ -1,7 +1,5 @@
 package com.sparta.blog.controller;
 
-import com.sparta.blog.dto.CommentRequestDto;
-import com.sparta.blog.dto.CommentResponseDto;
 import com.sparta.blog.dto.PostRequestDto;
 import com.sparta.blog.dto.PostResponseDto;
 import com.sparta.blog.security.UserDetailsImpl;
@@ -50,27 +48,5 @@ public class PostController {
     public PostResponseDto deletePost(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         postService.deletePost(userDetails.getUser(), id);
         return new PostResponseDto(true);
-    }
-
-    // 댓글 작성
-    @PostMapping("/posts/{id}/comments")
-    public void addComment(@PathVariable Long id,
-                            @RequestBody CommentRequestDto requestDto,
-                            @AuthenticationPrincipal UserDetailsImpl userDetails
-    ) {
-        postService.addComment(id, requestDto, userDetails.getUser());
-    }
-
-    // 댓글 수정
-    @PutMapping("/posts/{id}/comments/{commentid}")
-    public void updateComment(@PathVariable Long id, Long commentId, @RequestBody CommentRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        postService.updateComment(id, commentId, requestDto, userDetails.getUser());
-    }
-
-    // 댓글 삭제
-    @DeleteMapping("/posts/{id}/comments/{commentid}")
-    public CommentResponseDto deleteComment(@PathVariable Long id, Long commentId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        postService.deleteComment(id, commentId, userDetails.getUser());
-        return new CommentResponseDto(true);
     }
 }
