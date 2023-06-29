@@ -1,10 +1,11 @@
 package com.sparta.blog.service;
 
+import com.sparta.blog.dto.CommentRequestDto;
 import com.sparta.blog.dto.PostRequestDto;
 import com.sparta.blog.dto.PostResponseDto;
-import com.sparta.blog.entity.Post;
-import com.sparta.blog.entity.User;
-import com.sparta.blog.entity.UserRoleEnum;
+import com.sparta.blog.entity.*;
+import com.sparta.blog.repository.CommentPostRepository;
+import com.sparta.blog.repository.CommentRepository;
 import com.sparta.blog.repository.PostRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,9 +16,13 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
-    public PostService(PostRepository postRepository) {
+    private final CommentRepository commentRepository;
+    private final CommentPostRepository commentPostRepository;
+    public PostService(PostRepository postRepository, CommentRepository commentRepository, CommentPostRepository commentPostRepository) {
         this.postRepository = postRepository;
-    } // 제어의 역전
+        this.commentRepository = commentRepository;
+        this.commentPostRepository = commentPostRepository;
+    }
 
     public PostResponseDto createPost(PostRequestDto requestDto, User user) {
         Post post = postRepository.save(new Post(requestDto, user)); // 게시글 저장
@@ -67,8 +72,66 @@ public class PostService {
         postRepository.delete(post);
     }
 
+    public void addComment(Long postId, CommentRequestDto requestDto, User user) {
+        Post post = findPost(postId);
+        Comment comment = commentRepository.save(new Comment(requestDto, user));
+        commentPostRepository.save(new CommentPost(comment, post));
+    }
+
+    @Transactional
+    public void updateComment(Long id, Long commentId, CommentRequestDto requestDto, User user) {
+        UserRoleEnum userRoleEnum = user.getRole();
+        Post post;
+        Comment comment;
+
+        if (userRoleEnum == UserRoleEnum.USER) {
+            post = postRepository.findByUserAndId(user, id);
+            if (post == null) {
+                throw new IllegalArgumentException("해당 글은 존재하지 않습니다.");
+            }
+            comment = commentRepository.findByUserAndId(user, commentId);
+            if (comment == null || !comment.getPost().getId().equals(id)) {
+                throw new IllegalArgumentException("해당 댓글은 존재하지 않거나 해당 글에 속하지 않습니다.");
+            }
+        } else {
+            post = findPost(id);
+            comment = findComment(commentId);
+        }
+
+        comment.update(requestDto);
+    }
+
+
+    public void deleteComment(Long id, Long commentId, User user) {
+        UserRoleEnum userRoleEnum = user.getRole();
+        Post post;
+        Comment comment;
+
+        if (userRoleEnum == UserRoleEnum.USER) {
+            post = postRepository.findByUserAndId(user, id);
+            if (post == null) {
+                throw new IllegalArgumentException("해당 글은 존재하지 않습니다.");
+            }
+            comment = commentRepository.findByUserAndId(user, commentId);
+            if (comment == null || !comment.getPost().getId().equals(id)) {
+                throw new IllegalArgumentException("해당 댓글은 존재하지 않거나 해당 글에 속하지 않습니다.");
+            }
+        } else {
+            post = findPost(id);
+            comment = findComment(commentId);
+        }
+
+        commentPostRepository.deleteByComment(comment); // comment와 관련된 관계 삭제
+        commentRepository.delete(comment); // comment 삭제
+    }
+
     private Post findPost(Long id) {
         return postRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("해당 글은 존재하지 않습니다."));
+    }
+
+    private Comment findComment(Long id) {
+        return commentRepository.findById(id).orElseThrow(() ->
+                new IllegalArgumentException("해당 댓글은 존재하지 않습니다."));
     }
 }
