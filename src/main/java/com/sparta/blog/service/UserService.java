@@ -6,8 +6,11 @@ import com.sparta.blog.entity.User;
 import com.sparta.blog.entity.UserRoleEnum;
 import com.sparta.blog.jwt.JwtUtil;
 import com.sparta.blog.repository.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.Optional;
 
@@ -51,4 +54,11 @@ public class UserService {
         userRepository.save(user);
         return new UserResponseDto(user);
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleDuplicateUserException(IllegalArgumentException e) {
+        // 중복된 사용자가 있음을 클라이언트에 반환
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
 }

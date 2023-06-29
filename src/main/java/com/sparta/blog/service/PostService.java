@@ -43,7 +43,10 @@ public class PostService {
         if (userRoleEnum == UserRoleEnum.USER) {
             post = postRepository.findByUserAndId(user, id);
             if (post == null) {
-                throw new NullPointerException("해당 글은 존재하지 않습니다.");
+                throw new IllegalArgumentException("해당 글은 존재하지 않습니다.");
+            }
+            if (!post.getUser().equals(user)) {
+                throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
             }
         } else {
             post = findPost(id);
@@ -60,7 +63,10 @@ public class PostService {
         if (userRoleEnum == UserRoleEnum.USER) {
             post = postRepository.findByUserAndId(user, id);
             if (post == null) {
-                throw new NullPointerException("해당 글은 존재하지 않습니다.");
+                throw new IllegalArgumentException("해당 글은 존재하지 않습니다.");
+            }
+            if (!post.getUser().equals(user)) {
+                throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
             }
         } else {
             post = findPost(id);
