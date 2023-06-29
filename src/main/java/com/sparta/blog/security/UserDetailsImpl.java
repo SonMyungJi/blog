@@ -31,6 +31,16 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+
+        SimpleGrantedAuthority adminAuthority = new SimpleGrantedAuthority("ROLE_ADMIN");
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(adminAuthority);
+
+        return authorities;
+    }
+
+    @Override
     public boolean isAccountNonExpired() {
         return true;
     }
