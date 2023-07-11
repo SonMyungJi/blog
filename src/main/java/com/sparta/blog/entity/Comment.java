@@ -1,14 +1,13 @@
 package com.sparta.blog.entity;
 
-import com.sparta.blog.dto.CommentRequestDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 @Table(name = "comments")
 public class Comment extends Timestamped {
@@ -17,18 +16,38 @@ public class Comment extends Timestamped {
     private Long id;
 
     @Column(nullable = false)
-    private String comment;
+    private String body;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
-    public Comment(CommentRequestDto requestDto, User user) {
-        this.comment = requestDto.getComment();
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE)
+    private List<LikeComment> likes;
+
+    @Column
+    private Long likeCount;
+
+    public Comment(String body, User user) {
+        this.body = body;
         this.user = user;
+        this.likeCount = 0L;
     }
 
-    public void update(CommentRequestDto requestDto) {
-        this.comment = requestDto.getComment();
+    public void setBody(String body) { this.body = body; }
+    public void setPost(Post post) { this.post = post; }
+
+    public void addLike(LikeComment like) {
+        likes.add(like);
+        likeCount++;
     }
+    public void removeLike(LikeComment like) {
+        likes.remove(like);
+        likeCount--;
+    }
+    public void setLikeCount(Long likeCount) { this.likeCount = likeCount; }
 }

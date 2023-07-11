@@ -18,8 +18,8 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     public User getUser() {
-        return user;
-    }
+        return this.user;
+    } // this.user -> 인스턴스 변수임을 명시
 
     @Override
     public String getPassword() {

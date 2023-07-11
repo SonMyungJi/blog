@@ -1,52 +1,79 @@
 package com.sparta.blog.controller;
 
+import com.sparta.blog.dto.ApiResponseDto;
+import com.sparta.blog.dto.PostListResponseDto;
 import com.sparta.blog.dto.PostRequestDto;
 import com.sparta.blog.dto.PostResponseDto;
 import com.sparta.blog.security.UserDetailsImpl;
 import com.sparta.blog.service.PostService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.concurrent.RejectedExecutionException;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api")
 public class PostController {
 
     private final PostService postService;
-    public PostController(PostService postService) {
-        this.postService = postService;
-    }
 
-    // 게시글 작성
     @PostMapping("/posts")
-    public PostResponseDto createPost(@RequestBody PostRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    // 작성자(User) 정보를 JWT에서 받기 때문에 @AuthenticationPrincipal 추가
-        return postService.createPost(requestDto, userDetails.getUser());
+    public ResponseEntity<PostResponseDto> createPost(@RequestBody PostRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        PostResponseDto result = postService.createPost(requestDto, userDetails.getUser());
+        return ResponseEntity.status(201).body(result);
     }
 
     // 게시글 목록 조회
     @GetMapping("/posts")
-    public List<PostResponseDto> getPosts() {
-        return postService.getPosts();
+    public ResponseEntity<PostListResponseDto> getPosts() {
+        PostListResponseDto result = postService.getPosts();
+        return ResponseEntity.ok().body(result);
     }
 
     // 게시글 조회
     @GetMapping("/posts/{id}")
-    public PostResponseDto getPost(@PathVariable Long id) {
-        return postService.getPost(id);
+    public ResponseEntity<PostResponseDto> getPost(@PathVariable Long id) {
+        PostResponseDto result = postService.getPost(id);
+        return ResponseEntity.ok().body(result);
     }
 
     // 게시글 수정
     @PutMapping("/posts/{id}")
-    public PostResponseDto updatePost(@PathVariable Long id, @RequestBody PostRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return postService.updatePost(userDetails.getUser(), id, requestDto);
+    public ResponseEntity<ApiResponseDto> updatePost(@PathVariable Long id, @RequestBody PostRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        try {
+            PostResponseDto result = postService.updatePost(userDetails.getUser(), id, requestDto);
+            return ResponseEntity.ok().body(result);
+        } catch (RejectedExecutionException e) {
+            return ResponseEntity.badRequest().body(new ApiResponseDto("작성자만 수정할 수 있습니다.", HttpStatus.BAD_REQUEST.value()));
+        }
     }
 
     // 게시글 삭제
     @DeleteMapping("/posts/{id}")
-    public PostResponseDto deletePost(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        postService.deletePost(userDetails.getUser(), id);
-        return new PostResponseDto(true);
+    public ResponseEntity<ApiResponseDto> deletePost(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        try {
+            postService.deletePost(userDetails.getUser(), id);
+            return ResponseEntity.ok().body(new ApiResponseDto("게시글 삭제 성공", HttpStatus.OK.value()));
+        } catch (RejectedExecutionException e) {
+            return ResponseEntity.badRequest().body(new ApiResponseDto("작성자만 삭제할 수 있습니다.", HttpStatus.BAD_REQUEST.value()));
+        }
+    }
+
+    @PutMapping("/posts/{id}/like")
+    public ResponseEntity<ApiResponseDto> togglePostLike(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        try {
+            boolean isLiked = postService.toggleLike(id, userDetails.getUser());
+            if (isLiked == false) {
+                return ResponseEntity.ok().body(new ApiResponseDto("좋아요 취소", HttpStatus.OK.value()));
+            } else {
+                return ResponseEntity.ok().body(new ApiResponseDto("좋아요", HttpStatus.OK.value()));
+            }
+        } catch (RejectedExecutionException e) {
+            return ResponseEntity.badRequest().body(new ApiResponseDto("권한이 없습니다.", HttpStatus.BAD_REQUEST.value()));
+        }
     }
 }

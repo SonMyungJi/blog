@@ -1,86 +1,81 @@
 package com.sparta.blog.service;
 
 import com.sparta.blog.dto.CommentRequestDto;
+import com.sparta.blog.dto.CommentResponseDto;
 import com.sparta.blog.entity.*;
 import com.sparta.blog.repository.CommentRepository;
-import com.sparta.blog.repository.PostCommentRepository;
-import com.sparta.blog.repository.PostRepository;
+import com.sparta.blog.repository.LikeCommentRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.concurrent.RejectedExecutionException;
+
 @Service
+@RequiredArgsConstructor
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final PostRepository postRepository;
-    private final PostCommentRepository postCommentRepository;
+    private final PostService postService;
+    private final LikeCommentRepository likeCommentRepository;
 
-    public CommentService(CommentRepository commentRepository, PostRepository postRepository, PostCommentRepository postCommentRepository) {
-        this.commentRepository = commentRepository;
-        this.postRepository = postRepository;
-        this.postCommentRepository = postCommentRepository;
-    }
+    public CommentResponseDto createComment(CommentRequestDto requestDto, User user) {
+        Post post = postService.findPost(requestDto.getPostId());
+        Comment comment = new Comment(requestDto.getBody(), user);
 
-    public void createComment(Long postId, CommentRequestDto requestDto, User user) {
-        Post post = findPost(postId);
-        Comment comment = commentRepository.save(new Comment(requestDto, user));
-        postCommentRepository.save(new PostComment(post, comment));
-    }
+        comment.setPost(post);
 
-    @Transactional
-    public void updateComment(Long id, Long postId, CommentRequestDto requestDto, User user) {
-        UserRoleEnum userRoleEnum = user.getRole();
-        Post post;
-        Comment comment;
-
-        if (userRoleEnum == UserRoleEnum.USER) {
-            post = postRepository.findByUserAndId(user, postId);
-            if (post == null) {
-                throw new IllegalArgumentException("해당 글은 존재하지 않습니다.");
-            }
-            comment = commentRepository.findByUserAndId(user, id);
-            if (comment == null) {
-                throw new IllegalArgumentException("해당 댓글은 존재하지 않습니다.");
-            }
-        } else {
-            post = findPost(postId);
-            comment = findComment(id);
-        }
-
-        comment.update(requestDto);
+        var savedComment = commentRepository.save(comment);
+        return new CommentResponseDto(savedComment);
     }
 
     @Transactional
-    public void deleteComment(Long id, Long postId, User user) {
-        UserRoleEnum userRoleEnum = user.getRole();
-        Post post;
-        Comment comment;
+    public CommentResponseDto updateComment(Long id, CommentRequestDto requestDto, User user) {
+        Comment comment = findComment(id);
 
-        if (userRoleEnum == UserRoleEnum.USER) {
-            post = postRepository.findByUserAndId(user, postId);
-            if (post == null) {
-                throw new IllegalArgumentException("해당 글은 존재하지 않습니다.");
-            }
-            comment = commentRepository.findByUserAndId(user, id);
-            if (comment == null) {
-                throw new IllegalArgumentException("해당 댓글은 존재하지 않습니다.");
-            }
-        } else {
-            post = findPost(postId);
-            comment = findComment(id);
+        if (!user.getRole().equals(UserRoleEnum.ADMIN) && !comment.getUser().equals(user)) {
+            throw new RejectedExecutionException();
         }
+        comment.setBody(requestDto.getBody());
 
-        postCommentRepository.deleteByComment(comment); // comment와 관련된 관계 삭제
-        commentRepository.delete(comment); // comment 삭제
+        return new CommentResponseDto(comment);
     }
 
+    public void deleteComment(Long id, User user) {
+        Comment comment = findComment(id);
 
-    private Post findPost(Long id) {
-        return postRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("해당 글은 존재하지 않습니다."));
+        if (!user.getRole().equals(UserRoleEnum.ADMIN) && !comment.getUser().equals(user)) {
+            throw new RejectedExecutionException();
+        }
+        commentRepository.delete(comment);
     }
 
-    private Comment findComment(Long id) {
+    public boolean toggleLike(Long id, User user) {
+        Comment comment = findComment(id);
+        LikeComment like = likeCommentRepository.findByCommentIdAndUser(id, user);
+
+        if(like == null) {
+            like = new LikeComment();
+            like.setUser(user);
+            like.setComment(comment);
+            like.setLike(true);
+            likeCommentRepository.save(like);
+
+            comment.addLike(like);
+            commentRepository.save(comment);
+
+            return true;
+        } else {
+            likeCommentRepository.delete(like);
+
+            comment.removeLike(like);
+            commentRepository.save(comment);
+
+            return false;
+        }
+    }
+
+    public Comment findComment(Long id) {
         return commentRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("해당 댓글은 존재하지 않습니다."));
     }
