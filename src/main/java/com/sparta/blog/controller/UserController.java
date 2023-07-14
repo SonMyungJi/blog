@@ -2,7 +2,6 @@ package com.sparta.blog.controller;
 
 import com.sparta.blog.dto.ApiResponseDto;
 import com.sparta.blog.dto.AuthRequestDto;
-import com.sparta.blog.security.JwtTokenProvider;
 import com.sparta.blog.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -18,11 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
-    private final JwtTokenProvider jwtTokenProvider;
 
-    public UserController(UserService userService, JwtTokenProvider jwtTokenProvider) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @PostMapping("/signup")
@@ -35,8 +32,6 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponseDto> login(@RequestBody AuthRequestDto requestDto, HttpServletResponse response) {
         userService.login(requestDto);
-        String token = jwtTokenProvider.generateToken(requestDto.getUsername());
-        response.addHeader("Authorization", "Bearer " + token);
         return ResponseEntity.ok().body(new ApiResponseDto("로그인 성공", HttpStatus.OK.value()));
     }
 }
